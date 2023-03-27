@@ -1,8 +1,10 @@
+# наследуемся от базовой ноды для 3D
 extends Node3D
+# имя класса нашей новой ноды
 class_name Rotator
 
 
-# наши любимые переменные
+# наши любимые глобальные переменные
 var _shift_angle: float = PI / 2
 var _angle: float = 0
 var _radius: float = 0

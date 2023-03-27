@@ -7,6 +7,8 @@ const dt: float = 0.1
 var camera: Rotator = null
 # глобальный объект управляющий светом
 var light: Rotator = null
+# глобальный объект для всплывающей подсказки
+var splash: Panel = null
 
 
 # функция создания текстуры checker (гугли что за текстура такая)
@@ -144,8 +146,41 @@ func add_light():
 	var accent_light = create_light(Vector3(0, 0, 0))
 	# хочу шоколадный цвет :)
 	accent_light.light_color = Color.CHOCOLATE
+
 	light.add_child(accent_light)
 	add_child(light)
+
+
+func add_splash_screen():
+	# добавляем 2D ноду с полупрозрачной панелью
+	splash = Panel.new()
+	# определенного размера
+	splash.set_size(Vector2(300, 200))
+	# и располагаем её по центру экрана
+	splash.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_KEEP_SIZE)
+
+	# добавляем текст с подсказой
+	var label = RichTextLabel.new()
+	# выставляем размер
+	label.set_size(Vector2(300, 150))
+	# и добавляем сам текст в формате BBCode
+	label.append_text(
+		"""[p align=center][b]HELP MENU[/b]
+[b][color=red]F1[/color][/b] show this help
+[b][color=red]R[/color][/b] reset scene
+[b][color=red]← →[/color][/b] rotate camera
+[b][color=red]↑ ↓[/color][/b] move camera
+[b][color=red]SPACE[/color][/b] shoot[/p]""")
+	# центрируем текст
+	label.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_KEEP_SIZE)
+
+	splash.add_child(label)
+	add_child(splash)
+
+	# запустим таймер автоскрытия
+	await get_tree().create_timer(3.0).timeout
+	# этот код выполниться после срабатывания таймера
+	splash.visible = false
 
 
 func _ready():
@@ -161,6 +196,8 @@ func _ready():
 	add_camera()
 	# добавляем свет
 	add_light()
+	# добавляем экран с информацией
+	add_splash_screen()
 
 
 func bang():
@@ -180,13 +217,18 @@ func bang():
 	add_child(box)
 
 
-# обработка пользовательского ввода
+# функция обработки пользовательского ввода
 func _input(event):
+	# будем обрабатывать только события от клавиатуры
 	if event is InputEventKey:
+		# открыть/закрыть подсказку по клавишам
+		if event.is_action_pressed("splash"):
+			splash.visible = !splash.visible
+
 		# закрытие окна
 		if event.is_action_pressed("close"):
 			get_tree().quit()
-		
+
 		# выстрел кубом
 		if event.is_action_pressed("shoot"):
 			bang()
